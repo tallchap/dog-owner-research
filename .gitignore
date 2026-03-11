@@ -1,0 +1,8 @@
+data/*.csv
+!data/sample.csv
+__pycache__/
+*.pyc
+results_*.csv
+venv/
+web/node_modules/
+web/.next/

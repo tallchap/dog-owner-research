@@ -1,0 +1,13 @@
+LicenseNumber,OwnerName,Address,City,State,Zip,Breed,Sex,SpayedNeutered,ExpirationDate
+SF-2024-001,Maria Chen,482 Valencia St,San Francisco,CA,94103,Yorkshire Terrier,F,Yes,2026-08-15
+SF-2024-002,David Park,1120 Folsom St,San Francisco,CA,94103,Golden Retriever,M,Yes,2026-06-01
+SF-2024-003,Sarah Johnson,55 Castro St,San Francisco,CA,94114,Poodle,F,Yes,2026-09-20
+SF-2024-004,James Wong,901 Irving St,San Francisco,CA,94122,Yorkshire Terrier,M,Yes,2026-07-10
+SF-2024-005,Emily Roberts,332 Hayes St,San Francisco,CA,94102,French Bulldog,M,No,2026-05-30
+SF-2024-006,Michael Torres,1450 Noriega St,San Francisco,CA,94122,Labrador Retriever,F,Yes,2026-11-01
+SF-2024-007,Lisa Kim,78 Divisadero St,San Francisco,CA,94117,Yorkshire Terrier Mix,F,Yes,2026-04-15
+SF-2024-008,Robert Garcia,2100 Mission St,San Francisco,CA,94110,German Shepherd,M,Yes,2026-10-22
+SF-2024-009,Amanda Lee,560 Green St,San Francisco,CA,94133,Chihuahua,F,No,2026-03-18
+SF-2024-010,Kevin O'Brien,1233 9th Ave,San Francisco,CA,94122,Pomeranian,M,Yes,2026-08-05
+SF-2024-011,Patricia Nguyen,420 Clement St,San Francisco,CA,94118,Yorkshire Terrier,F,Yes,2026-12-01
+SF-2024-012,Daniel Martinez,88 Potrero Ave,San Francisco,CA,94110,Beagle,M,Yes,2026-06-15
