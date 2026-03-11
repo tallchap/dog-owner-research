@@ -1,39 +1,37 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { sampleRecords, breeds, neighborhoods, zips, DogRecord } from "./data";
+import { records, breeds, zips, PetLicense } from "./data";
+
+const PAGE_SIZE = 100;
 
 export default function Home() {
   const [search, setSearch] = useState("");
   const [breedFilter, setBreedFilter] = useState("");
-  const [neighborhoodFilter, setNeighborhoodFilter] = useState("");
   const [zipFilter, setZipFilter] = useState("");
-  const [sortCol, setSortCol] = useState<keyof DogRecord>("ownerName");
+  const [sortCol, setSortCol] = useState<keyof PetLicense>("animalName");
   const [sortAsc, setSortAsc] = useState(true);
+  const [page, setPage] = useState(0);
 
   const filtered = useMemo(() => {
-    let results = sampleRecords;
+    let results = records;
 
     if (search) {
       const q = search.toLowerCase();
       results = results.filter(
         (r) =>
-          r.ownerName.toLowerCase().includes(q) ||
-          r.dogName.toLowerCase().includes(q) ||
-          r.breed.toLowerCase().includes(q) ||
-          r.address.toLowerCase().includes(q) ||
-          r.neighborhood.toLowerCase().includes(q) ||
-          r.id.toLowerCase().includes(q)
+          r.animalName.toLowerCase().includes(q) ||
+          r.primaryBreed.toLowerCase().includes(q) ||
+          r.secondaryBreed.toLowerCase().includes(q) ||
+          r.licenseNumber.toLowerCase().includes(q) ||
+          r.zip.includes(q)
       );
     }
 
     if (breedFilter) {
       results = results.filter((r) =>
-        r.breed.toLowerCase().includes(breedFilter.toLowerCase())
+        r.primaryBreed.toLowerCase().includes(breedFilter.toLowerCase())
       );
-    }
-    if (neighborhoodFilter) {
-      results = results.filter((r) => r.neighborhood === neighborhoodFilter);
     }
     if (zipFilter) {
       results = results.filter((r) => r.zip === zipFilter);
@@ -49,22 +47,26 @@ export default function Home() {
     });
 
     return results;
-  }, [search, breedFilter, neighborhoodFilter, zipFilter, sortCol, sortAsc]);
+  }, [search, breedFilter, zipFilter, sortCol, sortAsc]);
 
-  const yorkieCount = sampleRecords.filter((r) =>
-    r.breed.toLowerCase().includes("yorkshire")
+  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+  const yorkieCount = records.filter((r) =>
+    r.primaryBreed.toLowerCase().includes("yorkshire")
   ).length;
 
-  const handleSort = (col: keyof DogRecord) => {
+  const handleSort = (col: keyof PetLicense) => {
     if (sortCol === col) {
       setSortAsc(!sortAsc);
     } else {
       setSortCol(col);
       setSortAsc(true);
     }
+    setPage(0);
   };
 
-  const sortIcon = (col: keyof DogRecord) => {
+  const sortIcon = (col: keyof PetLicense) => {
     if (sortCol !== col) return " \u2195";
     return sortAsc ? " \u2191" : " \u2193";
   };
@@ -72,23 +74,26 @@ export default function Home() {
   const clearFilters = () => {
     setSearch("");
     setBreedFilter("");
-    setNeighborhoodFilter("");
     setZipFilter("");
+    setPage(0);
   };
 
-  const hasFilters = search || breedFilter || neighborhoodFilter || zipFilter;
+  const hasFilters = search || breedFilter || zipFilter;
+
+  const isYorkie = (r: PetLicense) =>
+    r.primaryBreed.toLowerCase().includes("yorkshire");
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          SF Dog Owner Research
+          Dog Owner Research
         </h1>
         <p className="text-gray-500">
-          Search SF dog registration records by breed, neighborhood, or owner.
-          Currently showing{" "}
-          <span className="font-semibold">{sampleRecords.length}</span> sample
-          records ({yorkieCount} Yorkies).
+          Searchable database of{" "}
+          <span className="font-semibold">{records.length.toLocaleString()}</span>{" "}
+          Seattle pet license records ({yorkieCount} Yorkies).
+          Source: Seattle Open Data.
         </p>
       </div>
 
@@ -96,9 +101,9 @@ export default function Home() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg border p-4">
           <div className="text-2xl font-bold text-gray-900">
-            {sampleRecords.length}
+            {records.length.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-500">Total Records</div>
+          <div className="text-sm text-gray-500">Total Dogs</div>
         </div>
         <div className="bg-white rounded-lg border p-4">
           <div className="text-2xl font-bold text-purple-600">
@@ -114,7 +119,7 @@ export default function Home() {
         </div>
         <div className="bg-white rounded-lg border p-4">
           <div className="text-2xl font-bold text-blue-600">
-            {filtered.length}
+            {filtered.length.toLocaleString()}
           </div>
           <div className="text-sm text-gray-500">Matching Results</div>
         </div>
@@ -122,17 +127,17 @@ export default function Home() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg border p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
             type="text"
-            placeholder="Search name, dog, breed, address..."
+            placeholder="Search pet name, breed, license #, zip..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <select
             value={breedFilter}
-            onChange={(e) => setBreedFilter(e.target.value)}
+            onChange={(e) => { setBreedFilter(e.target.value); setPage(0); }}
             className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">All Breeds</option>
@@ -144,20 +149,8 @@ export default function Home() {
             ))}
           </select>
           <select
-            value={neighborhoodFilter}
-            onChange={(e) => setNeighborhoodFilter(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="">All Neighborhoods</option>
-            {neighborhoods.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <select
             value={zipFilter}
-            onChange={(e) => setZipFilter(e.target.value)}
+            onChange={(e) => { setZipFilter(e.target.value); setPage(0); }}
             className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">All Zip Codes</option>
@@ -185,15 +178,13 @@ export default function Home() {
             <tr className="border-b bg-gray-50">
               {(
                 [
-                  ["id", "License #"],
-                  ["ownerName", "Owner"],
-                  ["address", "Address"],
-                  ["neighborhood", "Neighborhood"],
-                  ["zip", "Zip"],
-                  ["breed", "Breed"],
-                  ["dogName", "Dog Name"],
-                  ["sex", "Sex"],
-                ] as [keyof DogRecord, string][]
+                  ["licenseDate", "License Date"],
+                  ["licenseNumber", "License #"],
+                  ["animalName", "Pet Name"],
+                  ["primaryBreed", "Primary Breed"],
+                  ["secondaryBreed", "Secondary Breed"],
+                  ["zip", "ZIP Code"],
+                ] as [keyof PetLicense, string][]
               ).map(([col, label]) => (
                 <th
                   key={col}
@@ -204,55 +195,43 @@ export default function Home() {
                   <span className="text-gray-400">{sortIcon(col)}</span>
                 </th>
               ))}
-              <th className="px-4 py-3 text-left font-medium text-gray-600 whitespace-nowrap">
-                Fixed
-              </th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => (
+            {paged.map((r, i) => (
               <tr
-                key={r.id}
+                key={r.licenseNumber + i}
                 className={`border-b hover:bg-purple-50 transition-colors ${
-                  r.breed.toLowerCase().includes("yorkshire")
-                    ? "bg-purple-50/50"
-                    : ""
+                  isYorkie(r) ? "bg-purple-50/50" : ""
                 }`}
               >
-                <td className="px-4 py-3 text-gray-500 font-mono text-xs">
-                  {r.id}
+                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                  {r.licenseDate}
                 </td>
-                <td className="px-4 py-3 font-medium">{r.ownerName}</td>
-                <td className="px-4 py-3 text-gray-600">{r.address}</td>
-                <td className="px-4 py-3 text-gray-600">{r.neighborhood}</td>
-                <td className="px-4 py-3 text-gray-500">{r.zip}</td>
+                <td className="px-4 py-3 text-gray-500 font-mono text-xs">
+                  {r.licenseNumber}
+                </td>
+                <td className="px-4 py-3 font-medium">{r.animalName}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                      r.breed.toLowerCase().includes("yorkshire")
+                      isYorkie(r)
                         ? "bg-purple-100 text-purple-800"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {r.breed}
+                    {r.primaryBreed}
                   </span>
                 </td>
-                <td className="px-4 py-3">{r.dogName}</td>
-                <td className="px-4 py-3 text-gray-500">
-                  {r.sex === "M" ? "Male" : "Female"}
+                <td className="px-4 py-3 text-gray-600">
+                  {r.secondaryBreed}
                 </td>
-                <td className="px-4 py-3">
-                  {r.spayedNeutered ? (
-                    <span className="text-green-600">Yes</span>
-                  ) : (
-                    <span className="text-red-500">No</span>
-                  )}
-                </td>
+                <td className="px-4 py-3 text-gray-500">{r.zip}</td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                   No records match your search.
                 </td>
               </tr>
@@ -261,9 +240,34 @@ export default function Home() {
         </table>
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-gray-500">
+            Showing {page * PAGE_SIZE + 1}&ndash;{Math.min((page + 1) * PAGE_SIZE, filtered.length)}{" "}
+            of {filtered.length.toLocaleString()}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0}
+              className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-30 hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-30 hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
       <p className="mt-6 text-xs text-gray-400 text-center">
-        Sample data for demonstration. Replace with real SF dog license records
-        obtained via public records request.
+        Data from Seattle Open Data (data.seattle.gov). First 5,000 dog license records.
       </p>
     </main>
   );

@@ -1,45 +1,39 @@
 # Dog Owner Research
 
-Search SF dog registration records by breed for targeted marketing.
+Searchable database of pet license records. Currently loaded with 5,000 real dog records from Seattle Open Data.
 
-## Getting the Data
-
-SF dog license data isn't publicly available online. Submit a public records request:
-
-1. Go to [SF NextRequest](https://sanfrancisco.nextrequest.com/)
-2. Create an account and submit a new request with this text:
-
-> I am requesting all active dog license registrations held by SF Animal Care & Control, including the following fields: owner name, owner address, dog breed, dog sex, license number, spay/neuter status, and license expiration date. Please provide in CSV or Excel format.
-
-3. Save the file to `data/` (it's gitignored — PII won't be committed)
-
-## Usage
+## Web UI
 
 ```bash
-# Find all Yorkshire Terrier owners (default)
-python search.py data/your_file.csv
-
-# Filter by zip code prefix
-python search.py data/your_file.csv --zip 941
-
-# Search a different breed
-python search.py data/your_file.csv --breed "Poodle"
-
-# Summary stats only
-python search.py data/your_file.csv --summary-only
-
-# Custom output file
-python search.py data/your_file.csv -o yorkie_owners.csv
+cd web
+npm install
+npm run dev
 ```
 
-## Test with sample data
+Open http://localhost:3000 — filter by breed, ZIP code, or search by pet name.
 
-```bash
-python search.py data/sample.csv
-```
-
-## Install
+## Python CLI
 
 ```bash
 pip install pandas
+
+# Search Seattle data for Yorkies
+python search.py data/sample.csv
+
+# Filter by ZIP prefix
+python search.py data/sample.csv --zip 981
+
+# Different breed
+python search.py data/sample.csv --breed "Poodle"
+
+# Stats only
+python search.py data/sample.csv --summary-only
 ```
+
+## Data Source
+
+5,000 dog license records from [Seattle Open Data](https://data.seattle.gov/Community/Seattle-Pet-Licenses/jguv-t9rb).
+
+Fields: License Date, License Number, Pet Name, Primary Breed, Secondary Breed, ZIP Code.
+
+No owner PII (name/address) — public open data has this stripped. For owner contact info, file a public records request with the relevant city.
